@@ -3,6 +3,7 @@ import path from 'path'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import typescript from '@rollup/plugin-typescript'
+import replace from '@rollup/plugin-replace'
 
 import { chromeExtension, simpleReloader } from 'rollup-plugin-chrome-extension'
 import { emptyDir } from 'rollup-plugin-empty-dir'
@@ -26,6 +27,10 @@ export default {
     typescript(),
     // Empties the output dir before a new build
     emptyDir(),
+    replace({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    }),
+
     // Outputs a zip file in ./releases
     isProduction && zip({ dir: 'releases' }),
   ],

@@ -3,7 +3,7 @@
   "content_scripts": [
     {
       "js": ["content/index.ts"],
-      "matches": ["https://*/*", "http://*/*"]
+      "matches": ["https://wayfarer.nianticlabs.com/new/*", "https://wayfarer.nianticlabs.com/*"]
     }
   ],
   "browser_action": { "default_popup": "pages/popup/index.html" }

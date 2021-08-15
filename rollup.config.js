@@ -15,10 +15,10 @@ export default {
   output: {
     dir: 'dist',
     format: 'esm',
-    chunkFileNames: path.join('chunks','[name]-[hash].js'),
+    chunkFileNames: path.join('chunks', '[name]-[hash].js'),
   },
   plugins: [
-    chromeExtension(),
+    chromeExtension({ browserPolyfill: true }),
     // Adds a Chrome extension reloader during watch mode
     simpleReloader(),
     resolve(),

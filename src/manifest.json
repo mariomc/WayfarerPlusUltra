@@ -2,7 +2,7 @@
   "background": { "scripts": ["background/index.ts"] },
   "content_scripts": [
     {
-      "js": ["content/index.ts"],
+      "js": ["content/index.tsx"],
       "matches": ["https://wayfarer.nianticlabs.com/new/*", "https://wayfarer.nianticlabs.com/*"]
     }
   ],

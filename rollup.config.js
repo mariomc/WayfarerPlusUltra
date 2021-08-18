@@ -28,6 +28,7 @@ export default {
     // Empties the output dir before a new build
     emptyDir(),
     replace({
+      preventAssignment: true,
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }),
 

@@ -1,3 +1,26 @@
+export type PresetScoreKey =
+  | 'cultural'
+  | 'description'
+  | 'location'
+  | 'quality'
+  | 'safety'
+  | 'uniqueness'
+  | 'what'
+
+export type PresetConfigScore = {
+  [key in PresetScoreKey]?: number
+}
+
+export type Randomizable = {
+  [key in PresetScoreKey]?: boolean 
+}
+
+export type PresetConfig = {
+  name: string
+  rng?: boolean
+  score: PresetConfigScore
+}
+
 export const selectors = {
   presets: {
     quality: 'app-should-be-wayspot .wf-rate > li',
@@ -6,18 +29,21 @@ export const selectors = {
     uniqueness: 'app-visually-unique .wf-rate > li',
     safety: 'app-safe-access .wf-rate > li',
     location: 'app-location-accuracy .wf-rate > li',
+    what: 'TODO',
   },
 }
 
-export const randomizable = {
+export const randomizable: Randomizable = {
   cultural: true,
   description: true,
   safety: true,
   uniqueness: true,
   location: false,
+  quality: false,
+  what: false,
 }
 
-export const presets = [
+export const presets:Array<PresetConfig> = [
   {
     name: 'Full 5',
     score: {

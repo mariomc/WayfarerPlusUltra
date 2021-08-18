@@ -1,22 +1,4 @@
-import { randomizable, selectors } from './config'
-
-export interface PresetConfigScore {
-    cultural?: number;
-    description?: number;
-    location?: number;
-    quality?: number;
-    safety?: number;
-    uniqueness?: number;
-    what?: number;
-}
-
-export type PresetScoreKey = keyof PresetConfigScore;
-
-export interface PresetConfig {
-    name: string;
-    rng?: boolean;
-    score: PresetConfigScore;
-}
+import { randomizable, selectors, PresetConfig, PresetScoreKey } from './config'
 
 function keepInBounds(val: number): number {
   if (val > 5) return 5
@@ -35,14 +17,18 @@ export const getScore = (
   const shouldRandomize = presetConfig.rng && randomizable[key]
   const delta = shouldRandomize ? randomRange(-1, 1) : 0
 
-  return keepInBounds(presetConfig.score[key] + delta)
+  return keepInBounds((presetConfig.score[key] || 0) + delta)
 }
 
+const getElement = (key: PresetScoreKey, index: number): HTMLElement | null => {
+  const elements = document.querySelectorAll(selectors.presets[key])
+  return elements?.[index] as HTMLElement
+}
 
-export const applyPreset = (presetConfig:PresetConfig): undefined => {
+export const applyPreset = (presetConfig: PresetConfig): void => {
   Object.keys(presetConfig.score).forEach((key) => {
-    const score = getScore(presetConfig, key)
+    const score = getScore(presetConfig, key as PresetScoreKey)
     const scoreIndex = score - 1
-    document.querySelectorAll(selectors.presets[key])?.[scoreIndex]?.click()
+    getElement(key as PresetScoreKey, scoreIndex)?.click()
   })
 }

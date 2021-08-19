@@ -1,18 +1,23 @@
-export type PresetScoreKey =
-  | 'cultural'
-  | 'description'
-  | 'location'
-  | 'quality'
-  | 'safety'
-  | 'uniqueness'
-  | 'what'
-
 export type PresetConfigScore = {
-  [key in PresetScoreKey]?: number
+  cultural?: number
+  description?: number
+  location?: number
+  quality?: number
+  safety?: number
+  uniqueness?: number
+  what?: number
 }
 
+export type PresetScoreKey = keyof PresetConfigScore;
+
 export type Randomizable = {
-  [key in PresetScoreKey]?: boolean 
+  cultural?: boolean
+  description?: boolean
+  location?: boolean
+  quality?: boolean
+  safety?: boolean
+  uniqueness?: boolean
+  what?: boolean
 }
 
 export type PresetConfig = {
@@ -23,6 +28,7 @@ export type PresetConfig = {
 
 export const selectors = {
   presets: {
+    selected: '.wf-rate__star--selected',
     quality: 'app-should-be-wayspot .wf-rate > li',
     description: 'app-title-and-description .wf-rate > li',
     cultural: 'app-historic-cultural-significance .wf-rate > li',

@@ -32,3 +32,8 @@ export const applyPreset = (presetConfig: PresetConfig): void => {
     getElement(key as PresetScoreKey, scoreIndex)?.click()
   })
 }
+
+export const getFilledInValue = (key:PresetScoreKey):number => {
+  const filledInStars = document.querySelectorAll(`${selectors.presets[key]}${selectors.presets.selected}`)
+  return filledInStars.length;
+}

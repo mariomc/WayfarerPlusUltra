@@ -34,6 +34,7 @@ type PresetProps = {
 
 type PresetsProps = {
   presets: Array<PresetConfig>
+  onDelete: (i: number) => void
 }
 
 const LOCAL_STORAGE_KEY = 'wfpu_presets'
@@ -84,20 +85,24 @@ const getNewValues = (): PresetConfigScore => {
 
 const formatPresetAsText = (config: PresetConfig): string => {
   const { score } = config
-  const scores = (Object.keys(score) as Array<PresetScoreKey>).map((label:PresetScoreKey) => `${label}:${score[label]}`)
+  const scores = (Object.keys(score) as Array<PresetScoreKey>).map(
+    (label: PresetScoreKey) => `${label}:${score[label]}`,
+  )
   if (config.rng) {
-    scores.push(`rng:true`)
+    scores.push('rng:true')
   }
-  return scores.join('\n')
+  return scores.join(';')
 }
 
-const Preset = ({ config }: PresetProps): JSX.Element => (
-  <Tooltip title={formatPresetAsText(config)}>
-    <Button onClick={() => applyPreset(config)} variant="text">
-      {config.name}
-    </Button>
-  </Tooltip>
-)
+const Preset = ({ config }: PresetProps): JSX.Element => {
+  return (
+    <Tooltip title={formatPresetAsText(config)}>
+      <Button onClick={() => applyPreset(config)} variant="text">
+        {config.name}
+      </Button>
+    </Tooltip>
+  )
+}
 
 const Random = () => (
   <Tooltip title="Shuffle" aria-label="add">
@@ -105,7 +110,7 @@ const Random = () => (
   </Tooltip>
 )
 
-const PresetsTable = ({ presets }: PresetsProps): JSX.Element => {
+const PresetsTable = ({ presets, onDelete }: PresetsProps): JSX.Element => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -117,31 +122,33 @@ const PresetsTable = ({ presets }: PresetsProps): JSX.Element => {
             <TableCell>Cultural</TableCell>
             <TableCell>Uniqueness</TableCell>
             <TableCell>Safety</TableCell>
+            <TableCell>RNG</TableCell>
+            <TableCell>Remove</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {presets.map((preset, index) => (
+          {presets.map((preset, index: number) => (
             <TableRow key={preset.name} selected={index === presets.length - 1}>
               <TableCell component="th" scope="row">
                 {preset.name}
               </TableCell>
-              <TableCell align="center">
-                {preset.score.quality}
-                {preset.rng}
-              </TableCell>
-              <TableCell align="center">
-                {preset.score.description}
-                {preset.rng && <Random />}
-              </TableCell>
-              <TableCell align="center">
-                {preset.score.cultural}
-                {preset.rng && <Random />}
-              </TableCell>
-              <TableCell align="center">
-                {preset.score.uniqueness}
-                {preset.rng && <Random />}
-              </TableCell>
+              <TableCell align="center">{preset.score.quality}</TableCell>
+              <TableCell align="center">{preset.score.description}</TableCell>
+              <TableCell align="center">{preset.score.cultural}</TableCell>
+              <TableCell align="center">{preset.score.uniqueness}</TableCell>
               <TableCell align="center">{preset.score.safety}</TableCell>
+              <TableCell align="center">{preset.rng && <Random />}</TableCell>
+              <TableCell align="center">
+                {index !== presets.length - 1 && (
+                  <Icon
+                    onClick={() => {
+                      onDelete(index)
+                    }}
+                  >
+                    delete_forever
+                  </Icon>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -183,6 +190,12 @@ export const Presets = (): JSX.Element => {
     setNewPreset({ ...newPreset, rng: !val })
   }
 
+  const handleDelete = (index: number) => {
+    const newPresets = presets.filter((_, i) => i !== index);
+    setPresets(newPresets);
+    setLS(LOCAL_STORAGE_KEY, newPresets)
+  }
+
   // Changing the padding
   useEffect(() => {
     document.body.style.paddingBottom = '64px'
@@ -198,12 +211,12 @@ export const Presets = (): JSX.Element => {
       sx={{ top: 'auto', bottom: 0 }}
     >
       <Toolbar>
-        <ButtonGroup color="primary" aria-label="outlined primary button group">
+        <ButtonGroup color="primary">
           {presets?.map((presetConfig) => (
             <Preset key={presetConfig.name} config={presetConfig} />
           ))}
         </ButtonGroup>
-        <Tooltip title="Add" aria-label="add">
+        <Tooltip title="Add Preset">
           <Fab color="primary" onClick={handleOpen}>
             <Icon>add_circle</Icon>
           </Fab>
@@ -218,7 +231,10 @@ export const Presets = (): JSX.Element => {
             {/* <DialogContentText>
             TL;DR
           </DialogContentText> */}
-            <PresetsTable presets={[...presets, newPreset]} />
+            <PresetsTable
+              presets={[...presets, newPreset]}
+              onDelete={handleDelete}
+            />
             <FormGroup row>
               <TextField
                 value={newPreset.name}

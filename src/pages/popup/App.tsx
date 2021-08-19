@@ -4,7 +4,7 @@ const App = (): JSX.Element => {
   return (
     <div>
       <h1>Popup Page</h1>
-      <p>If you are seeing this, React is working!</p>
+      <p>This page will contain the future settings for WayfarerPlusUltra</p>
     </div>
   )
 }

@@ -128,7 +128,7 @@ const PresetsTable = ({ presets, onDelete }: PresetsProps): JSX.Element => {
         </TableHead>
         <TableBody>
           {presets.map((preset, index: number) => (
-            <TableRow key={preset.name} selected={index === presets.length - 1}>
+            <TableRow key={`${preset.name}-${index}`} selected={index === presets.length - 1}>
               <TableCell component="th" scope="row">
                 {preset.name}
               </TableCell>

@@ -12,29 +12,18 @@ import AppBar from '@material-ui/core/AppBar'
 import Fab from '@material-ui/core/Fab'
 import Tooltip from '@material-ui/core/Tooltip'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import Table from '@material-ui/core/Table'
-import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
-import TableContainer from '@material-ui/core/TableContainer'
-import TableHead from '@material-ui/core/TableHead'
-import TableRow from '@material-ui/core/TableRow'
-import Paper from '@material-ui/core/Paper'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Switch from '@material-ui/core/Switch'
 // import AddCircle from '@material-ui/icons/AddCircle'
 import Icon from '@material-ui/core/Icon'
 
+import { PresetsTable } from './presets-table'
 import type { PresetConfig, PresetConfigScore, PresetScoreKey } from '../config'
 import { applyPreset, getFilledInValue } from '../utils'
 
 type PresetProps = {
   config: PresetConfig
-}
-
-type PresetsProps = {
-  presets: Array<PresetConfig>
-  onDelete: (i: number) => void
 }
 
 const LOCAL_STORAGE_KEY = 'wfpu_presets'
@@ -104,59 +93,6 @@ const Preset = ({ config }: PresetProps): JSX.Element => {
   )
 }
 
-const Random = () => (
-  <Tooltip title="Shuffle" aria-label="add">
-    <Icon fontSize="small">shuffle</Icon>
-  </Tooltip>
-)
-
-const PresetsTable = ({ presets, onDelete }: PresetsProps): JSX.Element => {
-  return (
-    <TableContainer component={Paper}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Quality</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell>Cultural</TableCell>
-            <TableCell>Uniqueness</TableCell>
-            <TableCell>Safety</TableCell>
-            <TableCell>RNG</TableCell>
-            <TableCell>Remove</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {presets.map((preset, index: number) => (
-            <TableRow key={`${preset.name}-${index}`} selected={index === presets.length - 1}>
-              <TableCell component="th" scope="row">
-                {preset.name}
-              </TableCell>
-              <TableCell align="center">{preset.score.quality}</TableCell>
-              <TableCell align="center">{preset.score.description}</TableCell>
-              <TableCell align="center">{preset.score.cultural}</TableCell>
-              <TableCell align="center">{preset.score.uniqueness}</TableCell>
-              <TableCell align="center">{preset.score.safety}</TableCell>
-              <TableCell align="center">{preset.rng && <Random />}</TableCell>
-              <TableCell align="center">
-                {index !== presets.length - 1 && (
-                  <Icon
-                    onClick={() => {
-                      onDelete(index)
-                    }}
-                  >
-                    delete_forever
-                  </Icon>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  )
-}
-
 const getNewPresetDefaults = (): PresetConfig => ({
   name: 'New Preset',
   rng: false,
@@ -191,8 +127,8 @@ export const Presets = (): JSX.Element => {
   }
 
   const handleDelete = (index: number) => {
-    const newPresets = presets.filter((_, i) => i !== index);
-    setPresets(newPresets);
+    const newPresets = presets.filter((_, i) => i !== index)
+    setPresets(newPresets)
     setLS(LOCAL_STORAGE_KEY, newPresets)
   }
 
@@ -222,6 +158,8 @@ export const Presets = (): JSX.Element => {
           </Fab>
         </Tooltip>
         <Dialog
+          fullWidth
+          maxWidth="xl"
           open={open}
           onClose={handleClose}
           aria-labelledby="form-dialog-title"

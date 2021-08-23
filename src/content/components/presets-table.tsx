@@ -1,15 +1,23 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 
+import {
+  DataGrid,
+  GridColDef,
+  GridEditRowsModel,
+  GridEditRowProps,
+  GridRowsProp,
+  GridCellEditCommitParams,
+  GridRowData,
+} from '@material-ui/data-grid'
+import { createTheme } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import type { PresetConfig } from '../config'
 
 type PresetsProps = {
-  presets: Array<PresetConfig>
-  onDelete: (i: number) => void
+  presets: PresetConfig[]
+  onChange: (model: GridCellEditCommitParams) => void
+  newLine: GridRowData
 }
-
-import { DataGrid, GridColDef, GridEditRowsModel, GridEditRowProps } from '@material-ui/data-grid'
-import { createTheme } from '@material-ui/core/styles'
-import { makeStyles } from '@material-ui/styles'
 
 const columns: GridColDef[] = [
   {
@@ -77,6 +85,38 @@ const columns: GridColDef[] = [
   },
 ]
 
+const mapRows = (presets: PresetConfig[]): GridRowsProp => {
+  return presets.map(
+    (
+      {
+        name,
+        rng,
+        score: {
+          cultural,
+          description,
+          location,
+          quality,
+          safety,
+          uniqueness,
+          what,
+        },
+      },
+      id,
+    ) => ({
+      id,
+      name,
+      rng,
+      cultural,
+      description,
+      location,
+      quality,
+      safety,
+      uniqueness,
+      what,
+    }),
+  )
+}
+
 const defaultTheme = createTheme()
 const useStyles = makeStyles(
   () => {
@@ -108,57 +148,43 @@ const capValue = (val: number): number => {
   return val
 }
 
-const capModelValue = (model:GridEditRowProps, key:string) => {
+const capModelValue = (model: GridEditRowProps, key: string) => {
   if (model[key]) {
-    model[key].value = capValue(Number(model[key].value ?? 0));
+    model[key].value = capValue(Number(model[key].value ?? 0)) || undefined
   }
 }
 
-export const PresetsTable = ({ presets }: PresetsProps): JSX.Element => {
+export const PresetsTable = ({
+  presets,
+  onChange,
+}: PresetsProps): JSX.Element => {
   const [editRowsModel, setEditRowsModel] = useState<GridEditRowsModel>({})
+  const [rows, setRows] = useState<GridRowsProp>(mapRows(presets))
   const classes = useStyles()
   const handleEditRowsModelChange = useCallback(
     (newModel: GridEditRowsModel) => {
       const updatedModel = { ...newModel }
       Object.keys(updatedModel).forEach((id) => {
-          capModelValue(updatedModel[id], 'quality');
-          capModelValue(updatedModel[id], 'description');
-          capModelValue(updatedModel[id], 'cultural');  
-          capModelValue(updatedModel[id], 'uniqueness');
-          capModelValue(updatedModel[id], 'safety');
-          capModelValue(updatedModel[id], 'location');
+        capModelValue(updatedModel[id], 'quality')
+        capModelValue(updatedModel[id], 'description')
+        capModelValue(updatedModel[id], 'cultural')
+        capModelValue(updatedModel[id], 'uniqueness')
+        capModelValue(updatedModel[id], 'safety')
+        capModelValue(updatedModel[id], 'location')
       })
-      console.log(updatedModel);
       setEditRowsModel(updatedModel)
-      console.log(presets);
     },
     [],
   )
 
-  const rows = presets.map(
-    (
-      {
-        name,
-        rng,
-        score: { quality, description, cultural, uniqueness, safety, location },
-      },
-      id,
-    ) => ({
-      id,
-      name,
-      rng,
-      quality,
-      description,
-      cultural,
-      uniqueness,
-      safety,
-      location,
-    }),
-  )
+  useEffect(() => {
+    setRows(mapRows(presets))
+  }, [presets])
+
   return (
     <div style={{ height: 400, width: '100%', minHeight: '25vh' }}>
       <DataGrid
-        onCellEditCommit={(ev) => console.log(ev)}
+        onCellEditCommit={onChange}
         className={classes.root}
         rowHeight={25}
         rows={rows}

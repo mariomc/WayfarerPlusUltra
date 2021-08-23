@@ -1,75 +1,53 @@
 import React, { useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
-import TextField from '@material-ui/core/TextField'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import Toolbar from '@material-ui/core/Toolbar'
 import AppBar from '@material-ui/core/AppBar'
+import type {
+  GridCellEditCommitParams,
+  GridRowData,
+} from '@material-ui/data-grid'
 
-// import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogContentText from '@material-ui/core/DialogContentText'
 import Fab from '@material-ui/core/Fab'
 import Tooltip from '@material-ui/core/Tooltip'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import FormGroup from '@material-ui/core/FormGroup'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import Switch from '@material-ui/core/Switch'
-// import AddCircle from '@material-ui/icons/AddCircle'
 import Icon from '@material-ui/core/Icon'
 
 import { PresetsTable } from './presets-table'
-import type { PresetConfig, PresetConfigScore, PresetScoreKey } from '../config'
-import { applyPreset, getFilledInValue } from '../utils'
+import type { PresetConfig, PresetScoreKey, FlatPreset } from '../config'
+import { applyPreset } from '../utils'
 
 type PresetProps = {
   config: PresetConfig
 }
 
+type FlatPresetMap = {
+  [key: string]: FlatPreset
+}
+
 const LOCAL_STORAGE_KEY = 'wfpu_presets'
 
-const getLS = (key: string): Array<PresetConfig> => {
+const getLS = (key: string): PresetConfig[] => {
   try {
     const unparsed = localStorage.getItem(key)
     const parsed = unparsed ? JSON.parse(unparsed) : []
-    return parsed as Array<PresetConfig>
+    return parsed as PresetConfig[]
   } catch (ex) {
     return []
   }
 }
 
-const setLS = (key: string, value: Array<PresetConfig>): void => {
+const setLS = (key: string, value: PresetConfig[]): void => {
   try {
-    localStorage.setItem(key, JSON.stringify(value))
+    const toSet = JSON.stringify(value)
+    localStorage.setItem(key, toSet)
   } catch (ex) {
     console.log('Error writing to local storage')
   }
-}
-
-function clean(obj: Record<string, unknown>): Record<string, unknown> {
-  for (const propName in obj) {
-    if (
-      obj[propName] === null ||
-      obj[propName] === undefined ||
-      obj[propName] === 0
-    ) {
-      delete obj[propName]
-    }
-  }
-  return obj
-}
-
-const getNewValues = (): PresetConfigScore => {
-  const toRet: PresetConfigScore = {
-    cultural: getFilledInValue('cultural'),
-    description: getFilledInValue('description'),
-    location: getFilledInValue('location'),
-    quality: getFilledInValue('quality'),
-    safety: getFilledInValue('safety'),
-    uniqueness: getFilledInValue('uniqueness'),
-  }
-
-  return clean(toRet)
 }
 
 const formatPresetAsText = (config: PresetConfig): string => {
@@ -83,6 +61,33 @@ const formatPresetAsText = (config: PresetConfig): string => {
   return scores.join(';')
 }
 
+const applyEditsToPresets = (
+  edits: FlatPresetMap,
+  presets: PresetConfig[],
+): PresetConfig[] => {
+  return presets
+    .map((preset, index) => {
+      const currentEdit = edits[String(index)] as FlatPreset
+      if (!currentEdit) {
+        return preset
+      }
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+
+      const { name, id, rng, ...score } = currentEdit
+
+      return {
+        ...preset,
+        name,
+        rng,
+        score: {
+          ...preset.score,
+          ...score,
+        },
+      }
+    })
+    .filter((preset) => Boolean(preset.name))
+}
+
 const Preset = ({ config }: PresetProps): JSX.Element => {
   return (
     <Tooltip title={formatPresetAsText(config)}>
@@ -93,43 +98,47 @@ const Preset = ({ config }: PresetProps): JSX.Element => {
   )
 }
 
-const getNewPresetDefaults = (): PresetConfig => ({
-  name: 'New Preset',
-  rng: false,
-  score: {},
-})
+const getStoredPresets = (): PresetConfig[] => {
+  return getLS(LOCAL_STORAGE_KEY) as PresetConfig[]
+}
 
 export const Presets = (): JSX.Element => {
-  const savedPresets = getLS(LOCAL_STORAGE_KEY) as Array<PresetConfig>
-  const [presets, setPresets] = useState(savedPresets)
-  const [open, setOpen] = useState(false)
-  const [newPreset, setNewPreset] = useState(getNewPresetDefaults())
+  const [changes, setChanges] = useState<FlatPresetMap>({} as FlatPresetMap)
+  const [presets, setPresets] = useState<PresetConfig[]>(getStoredPresets())
+  const [open, setOpen] = useState<boolean>(false)
+
+  const cleanUp = () => {
+    setChanges({} as FlatPresetMap)
+    setPresets(getStoredPresets())
+  }
 
   const handleClose = () => {
     setOpen(false)
+    cleanUp()
   }
 
   const handleOpen = () => {
     setOpen(true)
-    setNewPreset({ ...newPreset, score: getNewValues() })
   }
 
   const handleSave = () => {
-    const newPresets = [...presets, newPreset]
-    setPresets(newPresets)
-    setNewPreset(getNewPresetDefaults())
+    // const UnsavedPresets = [...presets, newPreset]
+    const newPresets = applyEditsToPresets(changes, presets)
     setLS(LOCAL_STORAGE_KEY, newPresets)
+    setPresets(newPresets)
     setOpen(false)
+    setTimeout(cleanUp, 10)
   }
 
-  const setRng = (val: boolean) => {
-    setNewPreset({ ...newPreset, rng: !val })
-  }
-
-  const handleDelete = (index: number) => {
-    const newPresets = presets.filter((_, i) => i !== index)
-    setPresets(newPresets)
-    setLS(LOCAL_STORAGE_KEY, newPresets)
+  const handleChange = (model: GridCellEditCommitParams) => {
+    const newChanges = {
+      ...changes,
+      [model.id]: {
+        ...changes[model.id],
+        [model.field]: model.value,
+      },
+    }
+    setChanges(newChanges)
   }
 
   // Changing the padding
@@ -138,7 +147,7 @@ export const Presets = (): JSX.Element => {
     return () => {
       document.body.style.paddingBottom = ''
     }
-  }, [])
+  })
 
   return (
     <AppBar
@@ -148,8 +157,11 @@ export const Presets = (): JSX.Element => {
     >
       <Toolbar>
         <ButtonGroup color="primary">
-          {presets?.map((presetConfig) => (
-            <Preset key={presetConfig.name} config={presetConfig} />
+          {presets?.map((presetConfig, index) => (
+            <Preset
+              key={`${presetConfig.name}-${index}`}
+              config={presetConfig}
+            />
           ))}
         </ButtonGroup>
         <Tooltip title="Add Preset">
@@ -166,34 +178,21 @@ export const Presets = (): JSX.Element => {
         >
           <DialogTitle id="form-dialog-title">Current Presets</DialogTitle>
           <DialogContent>
-            {/* <DialogContentText>
-            TL;DR
-          </DialogContentText> */}
+            <DialogContentText>
+              Edit the presets by double-clicking the fields. Remove them by
+              deleting their title. Commit the changes by saving.
+            </DialogContentText>
             <PresetsTable
-              presets={[...presets, newPreset]}
-              onDelete={handleDelete}
+              presets={presets}
+              onChange={handleChange}
+              newLine={
+                {
+                  name: '',
+                  rng: true,
+                  score: {},
+                } as GridRowData
+              }
             />
-            <FormGroup row>
-              <TextField
-                value={newPreset.name}
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Name"
-                type="text"
-                inputProps={{ autoComplete: 'false' }}
-                onChange={(ev) =>
-                  setNewPreset({ ...newPreset, name: ev.target.value })
-                }
-                fullWidth
-              />
-              <FormControlLabel
-                checked={newPreset.rng}
-                onChange={() => setRng(Boolean(newPreset.rng))}
-                control={<Switch name="checkedB" color="primary" />}
-                label="Random"
-              />
-            </FormGroup>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">

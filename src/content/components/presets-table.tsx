@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, memo } from 'react'
 
 import {
   DataGrid,
@@ -7,7 +7,6 @@ import {
   GridEditRowProps,
   GridRowsProp,
   GridCellEditCommitParams,
-  GridRowData,
 } from '@material-ui/data-grid'
 import { createTheme } from '@material-ui/core/styles'
 import { makeStyles } from '@material-ui/styles'
@@ -16,7 +15,6 @@ import type { PresetConfig } from '../config'
 type PresetsProps = {
   presets: PresetConfig[]
   onChange: (model: GridCellEditCommitParams) => void
-  newLine: GridRowData
 }
 
 const columns: GridColDef[] = [
@@ -91,6 +89,7 @@ const mapRows = (presets: PresetConfig[]): GridRowsProp => {
       {
         name,
         rng,
+        id,
         score: {
           cultural,
           description,
@@ -101,9 +100,9 @@ const mapRows = (presets: PresetConfig[]): GridRowsProp => {
           what,
         },
       },
-      id,
+      index,
     ) => ({
-      id,
+      id: id || index,
       name,
       rng,
       cultural,
@@ -154,47 +153,57 @@ const capModelValue = (model: GridEditRowProps, key: string) => {
   }
 }
 
-export const PresetsTable = ({
-  presets,
-  onChange,
-}: PresetsProps): JSX.Element => {
-  const [editRowsModel, setEditRowsModel] = useState<GridEditRowsModel>({})
-  const [rows, setRows] = useState<GridRowsProp>(mapRows(presets))
-  const classes = useStyles()
-  const handleEditRowsModelChange = useCallback(
-    (newModel: GridEditRowsModel) => {
-      const updatedModel = { ...newModel }
-      Object.keys(updatedModel).forEach((id) => {
-        capModelValue(updatedModel[id], 'quality')
-        capModelValue(updatedModel[id], 'description')
-        capModelValue(updatedModel[id], 'cultural')
-        capModelValue(updatedModel[id], 'uniqueness')
-        capModelValue(updatedModel[id], 'safety')
-        capModelValue(updatedModel[id], 'location')
-      })
-      setEditRowsModel(updatedModel)
-    },
-    [],
-  )
-
-  useEffect(() => {
-    setRows(mapRows(presets))
-  }, [presets])
-
-  return (
-    <div style={{ height: 400, width: '100%', minHeight: '25vh' }}>
-      <DataGrid
-        onCellEditCommit={onChange}
-        className={classes.root}
-        rowHeight={25}
-        rows={rows}
-        columns={columns}
-        hideFooterPagination
-        disableSelectionOnClick
-        editRowsModel={editRowsModel}
-        onEditRowsModelChange={handleEditRowsModelChange}
-        disableColumnMenu
-      />
-    </div>
-  )
+const getNewOnes = () => {
+  return Array(5)
+    .fill(0)
+    .map((_, i) => ({
+      name: '',
+      id: `new-${i}`,
+      rng: false,
+      score: {},
+    }))
 }
+
+export const PresetsTable = memo(
+  ({ presets, onChange }: PresetsProps): JSX.Element => {
+    const [editRowsModel, setEditRowsModel] = useState<GridEditRowsModel>({})
+    const [rows, setRows] = useState<GridRowsProp>([])
+    const classes = useStyles()
+    const handleEditRowsModelChange = useCallback(
+      (newModel: GridEditRowsModel) => {
+        const updatedModel = { ...newModel }
+        Object.keys(updatedModel).forEach((id) => {
+          capModelValue(updatedModel[id], 'quality')
+          capModelValue(updatedModel[id], 'description')
+          capModelValue(updatedModel[id], 'cultural')
+          capModelValue(updatedModel[id], 'uniqueness')
+          capModelValue(updatedModel[id], 'safety')
+          capModelValue(updatedModel[id], 'location')
+        })
+        setEditRowsModel(updatedModel)
+      },
+      [],
+    )
+
+    useEffect(() => {
+      setRows(mapRows([...presets, ...getNewOnes()]))
+    }, [presets])
+
+    return (
+      <div style={{ height: 400, width: '100%', minHeight: '25vh' }}>
+        <DataGrid
+          onCellEditCommit={onChange}
+          className={classes.root}
+          rowHeight={25}
+          rows={rows}
+          columns={columns}
+          hideFooterPagination
+          disableSelectionOnClick
+          editRowsModel={editRowsModel}
+          onEditRowsModelChange={handleEditRowsModelChange}
+          disableColumnMenu
+        />
+      </div>
+    )
+  },
+)

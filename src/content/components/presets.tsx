@@ -6,10 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import Toolbar from '@material-ui/core/Toolbar'
 import AppBar from '@material-ui/core/AppBar'
-import type {
-  GridCellEditCommitParams,
-  GridRowData,
-} from '@material-ui/data-grid'
+import type { GridCellEditCommitParams } from '@material-ui/data-grid'
 
 import DialogContentText from '@material-ui/core/DialogContentText'
 import Fab from '@material-ui/core/Fab'
@@ -61,31 +58,47 @@ const formatPresetAsText = (config: PresetConfig): string => {
   return scores.join(';')
 }
 
+const mapPreset = (edit: FlatPreset): PresetConfig => {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+
+  const { name, id, rng, ...score } = edit
+
+  return {
+    name,
+    rng,
+    score,
+  }
+}
+
 const applyEditsToPresets = (
   edits: FlatPresetMap,
   presets: PresetConfig[],
 ): PresetConfig[] => {
-  return presets
-    .map((preset, index) => {
-      const currentEdit = edits[String(index)] as FlatPreset
-      if (!currentEdit) {
-        return preset
-      }
-      /* eslint-disable @typescript-eslint/no-unused-vars */
+  const editedPresets = presets.map((preset, index) => {
+    const edit = edits[index] as FlatPreset
+    if (!edit) {
+      return preset
+    }
 
-      const { name, id, rng, ...score } = currentEdit
+    const editedPreset = mapPreset(edit)
 
-      return {
-        ...preset,
-        name,
-        rng,
-        score: {
-          ...preset.score,
-          ...score,
-        },
-      }
-    })
-    .filter((preset) => Boolean(preset.name))
+    return {
+      ...preset,
+      ...editedPreset,
+      score: {
+        ...preset.score,
+        ...editedPreset.score,
+      },
+    }
+  })
+  const newPresets = Object.keys(edits)
+    .filter((id) => id?.includes('new'))
+    .map((key) => edits[key])
+    .map(mapPreset)
+
+  return [...editedPresets, ...newPresets].filter((preset) =>
+    Boolean(preset.name),
+  )
 }
 
 const Preset = ({ config }: PresetProps): JSX.Element => {
@@ -122,7 +135,6 @@ export const Presets = (): JSX.Element => {
   }
 
   const handleSave = () => {
-    // const UnsavedPresets = [...presets, newPreset]
     const newPresets = applyEditsToPresets(changes, presets)
     setLS(LOCAL_STORAGE_KEY, newPresets)
     setPresets(newPresets)
@@ -179,20 +191,11 @@ export const Presets = (): JSX.Element => {
           <DialogTitle id="form-dialog-title">Current Presets</DialogTitle>
           <DialogContent>
             <DialogContentText>
+              Create new presets by editing the empty lines.
               Edit the presets by double-clicking the fields. Remove them by
               deleting their title. Commit the changes by saving.
             </DialogContentText>
-            <PresetsTable
-              presets={presets}
-              onChange={handleChange}
-              newLine={
-                {
-                  name: '',
-                  rng: true,
-                  score: {},
-                } as GridRowData
-              }
-            />
+            <PresetsTable presets={presets} onChange={handleChange} />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">

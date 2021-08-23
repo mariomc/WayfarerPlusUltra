@@ -22,6 +22,7 @@ export type Randomizable = {
 
 export type PresetConfig = {
   name: string
+  id?: string | number
   rng?: boolean
   score: PresetConfigScore
 }

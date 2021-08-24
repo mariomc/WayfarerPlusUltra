@@ -15,11 +15,11 @@ export default {
   input: 'src/manifest.json',
   output: {
     dir: 'dist',
-    format: 'esm',
+    format: 'es',
     chunkFileNames: path.join('chunks', '[name]-[hash].js'),
   },
   plugins: [
-    chromeExtension({ browserPolyfill: true }),
+    chromeExtension({ browserPolyfill: true, dynamicImportWrapper: false }),
     // Adds a Chrome extension reloader during watch mode
     simpleReloader(),
     resolve(),

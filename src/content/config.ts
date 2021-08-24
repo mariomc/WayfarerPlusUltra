@@ -8,7 +8,7 @@ export type PresetConfigScore = {
   what?: number
 }
 
-export type PresetScoreKey = keyof PresetConfigScore;
+export type PresetScoreKey = keyof PresetConfigScore
 
 export type Randomizable = {
   cultural?: boolean
@@ -22,8 +22,22 @@ export type Randomizable = {
 
 export type PresetConfig = {
   name: string
+  id?: string | number
   rng?: boolean
   score: PresetConfigScore
+}
+
+export type FlatPreset = {
+  name: string
+  id?: string
+  rng?: boolean
+  cultural?: number
+  description?: number
+  location?: number
+  quality?: number
+  safety?: number
+  uniqueness?: number
+  what?: number
 }
 
 export const selectors = {
@@ -49,7 +63,7 @@ export const randomizable: Randomizable = {
   what: false,
 }
 
-export const presets:Array<PresetConfig> = [
+export const presets: Array<PresetConfig> = [
   {
     name: 'Full 5',
     score: {

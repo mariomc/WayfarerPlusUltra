@@ -15,6 +15,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Icon from '@material-ui/core/Icon'
 
 import { PresetsTable } from './presets-table'
+import { SmartSubmit } from './smart-submit'
 import type { PresetConfig, PresetScoreKey, FlatPreset } from '../config'
 import { applyPreset } from '../utils'
 
@@ -176,11 +177,12 @@ export const Presets = (): JSX.Element => {
             />
           ))}
         </ButtonGroup>
-        <Tooltip title="Add Preset">
+        <Tooltip title="Edit Presets">
           <Fab color="primary" onClick={handleOpen}>
-            <Icon>add_circle</Icon>
+            <Icon>settings</Icon>
           </Fab>
         </Tooltip>
+        <SmartSubmit />
         <Dialog
           fullWidth
           maxWidth="xl"
@@ -191,9 +193,9 @@ export const Presets = (): JSX.Element => {
           <DialogTitle id="form-dialog-title">Current Presets</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Create new presets by editing the empty lines.
-              Edit the presets by double-clicking the fields. Remove them by
-              deleting their title. Commit the changes by saving.
+              Create new presets by editing the empty lines. Edit the presets by
+              double-clicking the fields. Remove them by deleting their title.
+              Commit the changes by saving.
             </DialogContentText>
             <PresetsTable presets={presets} onChange={handleChange} />
           </DialogContent>

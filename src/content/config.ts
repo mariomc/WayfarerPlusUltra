@@ -41,6 +41,10 @@ export type FlatPreset = {
 }
 
 export const selectors = {
+  smartSubmit: {
+    submit: 'app-submit-review-split-button .wf-split-button__main',
+    what: 'app-review-categorization .review-categorization__option'
+  },
   presets: {
     selected: '.wf-rate__star--selected',
     quality: 'app-should-be-wayspot .wf-rate > li',

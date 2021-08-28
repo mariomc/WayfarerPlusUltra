@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
 import Dialog from '@material-ui/core/Dialog'
@@ -116,7 +116,7 @@ const getStoredPresets = (): PresetConfig[] => {
   return getLS(LOCAL_STORAGE_KEY) as PresetConfig[]
 }
 
-export const Presets = (): JSX.Element => {
+const PresetsNoMemo = (): JSX.Element => {
   const [changes, setChanges] = useState<FlatPresetMap>({} as FlatPresetMap)
   const [presets, setPresets] = useState<PresetConfig[]>(getStoredPresets())
   const [open, setOpen] = useState<boolean>(false)
@@ -212,3 +212,5 @@ export const Presets = (): JSX.Element => {
     </AppBar>
   )
 }
+
+export const Presets = memo(PresetsNoMemo)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
 import Dialog from '@material-ui/core/Dialog'
@@ -15,6 +15,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Icon from '@material-ui/core/Icon'
 
 import { PresetsTable } from './presets-table'
+import { SmartSubmit } from './smart-submit'
 import type { PresetConfig, PresetScoreKey, FlatPreset } from '../config'
 import { applyPreset } from '../utils'
 
@@ -115,7 +116,7 @@ const getStoredPresets = (): PresetConfig[] => {
   return getLS(LOCAL_STORAGE_KEY) as PresetConfig[]
 }
 
-export const Presets = (): JSX.Element => {
+const PresetsNoMemo = (): JSX.Element => {
   const [changes, setChanges] = useState<FlatPresetMap>({} as FlatPresetMap)
   const [presets, setPresets] = useState<PresetConfig[]>(getStoredPresets())
   const [open, setOpen] = useState<boolean>(false)
@@ -176,11 +177,12 @@ export const Presets = (): JSX.Element => {
             />
           ))}
         </ButtonGroup>
-        <Tooltip title="Add Preset">
+        <Tooltip title="Edit Presets">
           <Fab color="primary" onClick={handleOpen}>
-            <Icon>add_circle</Icon>
+            <Icon>settings</Icon>
           </Fab>
         </Tooltip>
+        <SmartSubmit />
         <Dialog
           fullWidth
           maxWidth="xl"
@@ -191,9 +193,9 @@ export const Presets = (): JSX.Element => {
           <DialogTitle id="form-dialog-title">Current Presets</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Create new presets by editing the empty lines.
-              Edit the presets by double-clicking the fields. Remove them by
-              deleting their title. Commit the changes by saving.
+              Create new presets by editing the empty lines. Edit the presets by
+              double-clicking the fields. Remove them by deleting their title.
+              Commit the changes by saving.
             </DialogContentText>
             <PresetsTable presets={presets} onChange={handleChange} />
           </DialogContent>
@@ -210,3 +212,5 @@ export const Presets = (): JSX.Element => {
     </AppBar>
   )
 }
+
+export const Presets = memo(PresetsNoMemo)

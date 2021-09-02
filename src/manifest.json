@@ -4,8 +4,13 @@
     {
       "run_at": "document_start",
       "js": ["content/index.tsx"],
-      "matches": ["https://wayfarer.nianticlabs.com/new/*", "https://wayfarer.nianticlabs.com/*"]
+      "matches": [
+        "https://wayfarer.nianticlabs.com/new/*",
+        "https://wayfarer.nianticlabs.com/*"
+      ]
     }
   ],
+  "web_accessible_resources": ["**/*.svg"],
+
   "browser_action": { "default_popup": "pages/popup/index.html" }
 }

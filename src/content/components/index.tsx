@@ -27,6 +27,7 @@ export const WayfarerUltra = (): JSX.Element => {
       origin: any
     }) {
       if (location.origin !== origin) {
+        console.log("not good origin");
         return
       }
       dispatch(data)

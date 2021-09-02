@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 48" version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>Icon / MapSpot</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Icon-/-MapSpot" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M16,48 C16,48 31,32 31,16 C31,7.71572875 24.2842712,1 16,1 C7.71572875,1 1,7.71572875 1,16 C0,32 16,48 16,48 Z" id="Path" fill="#00FF00" fill-rule="nonzero"></path>
+        <path d="M16,27.8444983 C9.4584642,27.8444983 4.15550167,22.5415358 4.15550167,16 C4.15550167,9.4584642 9.4584642,4.15550167 16,4.15550167 C22.5415358,4.15550167 27.8444983,9.4584642 27.8444983,16 C27.8444983,22.5415358 22.5415358,27.8444983 16,27.8444983 Z" id="Path" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+</svg>

@@ -12,14 +12,33 @@ type DevToolsHook = {
   send: () => void
 }
 
+type WFPU = {
+  extensionURL: string
+}
+
+type IconMarker = {
+  url: string
+}
+
+type Marker = {
+  icon: IconMarker
+}
+
+interface AngularElement {
+  __ngContext__: any
+}
+
+type EnhancedElement = Element & AngularElement
+
 declare const window: Window &
   typeof globalThis & {
     __REDUX_DEVTOOLS_EXTENSION__: DevToolsHook
+    WFPU: WFPU
   }
 
 const DEBUG = false
 
-function codeToInject(WFPU) {
+function codeToInject(wfpu: WFPU) {
   // const oldDevTools = window['__REDUX_DEVTOOLS_EXTENSION__']
   const sendMessage =
     (type: string) =>
@@ -53,7 +72,11 @@ function codeToInject(WFPU) {
     send: sendMessage('send'),
   }
 
-  function addLowestDistCircle(gMap, lat, lng) {
+  function addLowestDistCircle(
+    gMap: google.maps.Map,
+    lat: number,
+    lng: number,
+  ) {
     const latLng = new google.maps.LatLng(lat, lng)
     const c = new google.maps.Circle({
       map: gMap,
@@ -68,8 +91,12 @@ function codeToInject(WFPU) {
     return c
   }
 
+  const getElement = (selector: string): EnhancedElement | null => {
+    return document.querySelector(selector)
+  }
+
   window.__REDUX_DEVTOOLS_EXTENSION__ = devTools
-  window.WFPU = WFPU
+  window.WFPU = wfpu
 
   window.addEventListener('message', (ev) => {
     if (ev.origin !== location.origin) {
@@ -79,37 +106,45 @@ function codeToInject(WFPU) {
     }
 
     if (ev.data && ev.data.type === 'reviewCells') {
-      const map1 = document.querySelector('app-check-duplicates nia-map')
-      const map2 = document.querySelector('app-location-accuracy nia-map')
-      const map1Ctx = map1.__ngContext__.at(-1)
-      const map2Ctx = map2.__ngContext__.at(-1)
+      const map1 = getElement('app-check-duplicates nia-map')
+      const map2 = getElement('app-location-accuracy nia-map')
+      const map1Ctx = map1?.__ngContext__?.at?.(-1)
+      const map2Ctx = map2?.__ngContext__?.at?.(-1)
 
-      // Add Precise Markers
-      map1Ctx.markers.nearby.markers = map1Ctx.markers.nearby.markers.map(
-        (marker) => ({
-          ...marker,
-          icon: {
-            ...marker.icon,
-            url: WFPU.extensionURL + 'icons/precise-marker.svg',
-          },
-        }),
-      )
-      map1Ctx.markers.default.markers = map1Ctx.markers.default.markers.map(
-        (marker) => ({
-          ...marker,
-          icon: {
-            ...marker.icon,
-            url: WFPU.extensionURL + 'icons/precise-marker-green.svg',
-          },
-        }),
-      )
+      // Add Precise Markers to nearby
+      if (map1Ctx) {
+        map1Ctx.markers.nearby.markers = map1Ctx.markers.nearby.markers.map(
+          (marker: Marker) => ({
+            ...marker,
+            icon: {
+              ...marker.icon,
+              url: wfpu.extensionURL + 'icons/precise-marker.svg',
+            },
+          }),
+        )
 
-      map2Ctx.markers.nearby = map1Ctx.markers.nearby
+        // Add Precise Markers to current
+        map1Ctx.markers.default.markers = map1Ctx.markers.default.markers.map(
+          (marker: Marker) => ({
+            ...marker,
+            icon: {
+              ...marker.icon,
+              url: wfpu.extensionURL + 'icons/precise-marker-green.svg',
+            },
+          }),
+        )
+      }
 
-      // Controls
-      Array.from(document.querySelectorAll('nia-map')).forEach((map) => {
-        const i = map.__ngContext__.length - 1
-        const c = map.__ngContext__[i].componentRef
+      // Copy default markers to 2nd map
+      if (map2Ctx && map1Ctx) {
+        map2Ctx.markers.nearby = map1Ctx.markers.nearby
+      }
+
+      // Add Controls
+      Array.from(
+        document.querySelectorAll('nia-map') as NodeListOf<EnhancedElement>,
+      ).forEach((map: EnhancedElement) => {
+        const c = map.__ngContext__.get(-1).componentRef
         c.showMapTypeControl =
           c.showRotateControl =
           c.showStreetViewControl =
@@ -118,7 +153,9 @@ function codeToInject(WFPU) {
       })
 
       // Cells
-      Array.from(document.querySelectorAll('agm-map')).forEach((map) => {
+      Array.from(
+        document.querySelectorAll('agm-map') as NodeListOf<EnhancedElement>,
+      ).forEach((map) => {
         const c = map.__ngContext__[8]
         c.updateS2CellLevel(17)
       })
@@ -143,12 +180,12 @@ function codeToInject(WFPU) {
   })
 }
 
-export const embed = (fn: () => void): void => {
-  const WFPU = { extensionURL: browser.runtime.getURL('') }
+export const embed = (fn: (wfppu: WFPU) => void): void => {
+  const Wfpu: WFPU = { extensionURL: browser.runtime.getURL('') }
   const script = document.createElement('script')
   const target = document.head || document.documentElement
   script.id = 'wfpu'
-  script.text = `(${fn.toString()})(${JSON.stringify(WFPU, null, 4)});`
+  script.text = `(${fn.toString()})(${JSON.stringify(Wfpu, null, 4)});`
   target.insertBefore(script, target.firstChild)
 }
 

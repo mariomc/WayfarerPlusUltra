@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "lib": ["dom", "es2019"],
+    "lib": ["dom", "es2020"],
     "module": "ESNext",
     "moduleResolution": "node",
     "noImplicitReturns": true,

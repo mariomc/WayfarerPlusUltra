@@ -44,7 +44,7 @@ export const MIN_WAIT_TIME = 1_000 * 20 // 20 Seconds
 export const VARIANCE_TIME = 1_000 * 10 // 10 Seconds
 export const MAX_REVIEW_TIME = 1_000 * 60 * 20 // 20 minutes
 
-const randomInteger = (min, max) => {
+const randomInteger = (min:number, max:number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 

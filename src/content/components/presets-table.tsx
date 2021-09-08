@@ -119,8 +119,6 @@ const mapRows = (presets: PresetConfig[]): GridRowsProp => {
 const defaultTheme = createTheme()
 const useStyles = makeStyles(
   () => {
-    const isDark = false
-
     return {
       root: {
         '& .MuiDataGrid-cell--editing': {
@@ -128,8 +126,8 @@ const useStyles = makeStyles(
           color: '#1a3e72',
         },
         '& .Mui-error': {
-          backgroundColor: `rgb(126,10,15, ${isDark ? 0 : 0.1})`,
-          color: isDark ? '#ff4343' : '#750f0f',
+          backgroundColor: `rgb(126,10,15,0.1)`,
+          color: '#750f0f',
         },
       },
     }

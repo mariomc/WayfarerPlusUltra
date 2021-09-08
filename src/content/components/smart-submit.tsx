@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, {
+  CSSProperties,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from 'react'
 import { useContextSelector } from 'use-context-selector'
 import Tooltip from '@material-ui/core/Tooltip'
 import Badge from '@material-ui/core/Badge'
@@ -13,8 +19,8 @@ import { selectors } from '../config'
 import { getWaitingTime } from '../utils'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const expiresSelector = (state: any): number | null => {
-  return state?.review?.reviewData?.data?.expires
+const expiresSelector = (state: any): number => {
+  return state?.review?.reviewData?.data?.expires || 0
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,7 +31,7 @@ const isValidSelector = (state: any): number | null => {
 const timeFormat = {
   minute: 'numeric',
   second: 'numeric',
-}
+} as Intl.DateTimeFormatOptions
 
 const timeFromMs = (ms: number) => {
   return new Intl.DateTimeFormat('default', timeFormat).format(new Date(ms))
@@ -35,8 +41,8 @@ const getDelta = (expires: number) => expires - new Date().valueOf()
 
 const style = {
   position: 'absolute',
-  right: 16,
-}
+  right: '16px',
+} as CSSProperties
 
 const Countdown = ({
   initialCount,
@@ -49,21 +55,17 @@ const Countdown = ({
   const STEP = 1000
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       const nextStep = counter - STEP
       setCounter(Math.max(0, nextStep))
     }, STEP)
 
     return () => {
-      clearTimeout(timeout)
+      clearTimeout(timeoutId)
     }
   })
 
-  if (initialCount <= 0) {
-    return invalidValue
-  }
-
-  return <>{timeFromMs(counter)}</>
+  return <>{initialCount <= 0 ? invalidValue : timeFromMs(counter)}</>
 }
 
 const Timer = ({ expires }: { expires: number }): JSX.Element => {
@@ -72,7 +74,7 @@ const Timer = ({ expires }: { expires: number }): JSX.Element => {
 
 const clickOnFirstEditOption = false // TODO: Change this into the preset. Here to test only
 
-const clickOnSubmit = (callback) => {
+const clickOnSubmit = (callback: (value: boolean) => void) => {
   const submitButton = document.querySelector(
     selectors.smartSubmit.submit,
   ) as HTMLButtonElement
@@ -92,7 +94,7 @@ const clickOnSubmit = (callback) => {
 export const SmartSubmit = (): JSX.Element | null => {
   const expires = useContextSelector(AppContext, expiresSelector)
   const isValid = useContextSelector(AppContext, isValidSelector)
-  const timerRef = useRef(null)
+  const timerRef = useRef(0)
   const [submitted, setSubmitted] = useState(false)
   const [waitingTime, setWaiting] = useState(0)
 
@@ -101,20 +103,21 @@ export const SmartSubmit = (): JSX.Element | null => {
 
     setWaiting(waitingMs)
 
-    timerRef.current = setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       clickOnSubmit(setSubmitted)
       setWaiting(0)
     }, waitingMs)
   }, [expires])
 
   useEffect(() => {
-    timerRef.current = null
     setSubmitted(false)
     setWaiting(0)
-    clearTimeout(timerRef.current)
+    window.clearTimeout(timerRef.current)
+    timerRef.current = 0
+
     return () => {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
+      window.clearTimeout(timerRef.current)
+      timerRef.current = 0
     }
   }, [expires])
 

@@ -27,7 +27,7 @@ export default {
     simpleReloader(),
     resolve(),
     commonjs(),
-    typescript(),
+    typescript({ lib: ['dom', 'es2020'] }),
     // Empties the output dir before a new build
     emptyDir(),
     replace({

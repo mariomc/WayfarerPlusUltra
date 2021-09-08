@@ -16,7 +16,7 @@ export const ReviewCells = (): JSX.Element | null => {
   return (
     <>
       <Tooltip title="Apply Map Mods">
-        <Fab color="primary" onClick={handleClick}>
+        <Fab color="primary" size="small" onClick={handleClick} sx={{ marginLeft: 1 }}>
           <Icon>map</Icon>
         </Fab>
       </Tooltip>

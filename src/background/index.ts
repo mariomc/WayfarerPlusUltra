@@ -1,1 +1,1 @@
-console.log('background script')
+console.log('Wayfarer Plus Ultra running')

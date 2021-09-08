@@ -13,7 +13,7 @@ test('browser api methods are defined after implementation in chrome api', () =>
   //     but unused methods in the Browser API will be undefined
   jestChrome.runtime.sendMessage.mockImplementation(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (message, cb: (message:any) => void) => {
+    (message, cb:any) => {
       cb?.({ greeting: 'test-response' })
     },
   )

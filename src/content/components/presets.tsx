@@ -179,7 +179,7 @@ const PresetsNoMemo = (): JSX.Element => {
           ))}
         </ButtonGroup>
         <Tooltip title="Edit Presets">
-          <Fab color="primary" onClick={handleOpen}>
+          <Fab color="secondary" size="small" onClick={handleOpen}>
             <Icon>settings</Icon>
           </Fab>
         </Tooltip>

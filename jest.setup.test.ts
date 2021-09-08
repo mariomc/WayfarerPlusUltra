@@ -11,9 +11,11 @@ test('browser api methods are defined after implementation in chrome api', () =>
   // You need to add an implementation for each Chrome API method you use
   //   Methods will be present in the Chrome API without implementations
   //     but unused methods in the Browser API will be undefined
-  jestChrome.runtime.sendMessage.mockImplementation((message, cb) => {
-    cb({ greeting: 'test-response' })
-  })
+  jestChrome.runtime.sendMessage.mockImplementation(
+    (message, cb: (any) => void) => {
+      cb?.({ greeting: 'test-response' })
+    },
+  )
 
   expect(browser.runtime.sendMessage).toBeDefined()
 })

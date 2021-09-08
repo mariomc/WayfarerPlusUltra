@@ -1,4 +1,5 @@
 {
+  "background": { "scripts": ["background/index.ts"] },
   "content_scripts": [
     {
       "run_at": "document_start",
@@ -9,5 +10,7 @@
       ]
     }
   ],
-  "web_accessible_resources": ["**/*.svg"]
+  "web_accessible_resources": ["**/*.svg"],
+
+  "browser_action": { "default_popup": "pages/popup/index.html" }
 }

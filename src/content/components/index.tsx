@@ -11,7 +11,7 @@ function reducer(state: any, action: any) {
   return state
 }
 
-const initialState = {};
+const initialState = {}
 
 export const WayfarerUltra = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -27,7 +27,6 @@ export const WayfarerUltra = (): JSX.Element => {
       origin: any
     }) {
       if (location.origin !== origin) {
-        console.log("not good origin");
         return
       }
       dispatch(data)

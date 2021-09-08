@@ -39,37 +39,48 @@ declare const window: Window &
 const DEBUG = false
 
 function codeToInject(wfpu: WFPU) {
-  // const oldDevTools = window['__REDUX_DEVTOOLS_EXTENSION__']
-  const sendMessage =
-    (type: string) =>
+  const monkeyPatch =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (...args: any[]) => {
-      if (DEBUG) console.log(type, args)
-      if (type === 'connect.subscribe') {
-        return
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [action, state] = args
+      (type: string, originalFn?: (...args: any[]) => any) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (...args: any[]) => {
+        const result = originalFn?.(...args)
+        if (DEBUG) console.log(type, args)
 
-      window.postMessage(
-        { sender: 'wfpu', type, action, state },
-        window.location.origin,
-      )
-    }
+        if (type !== 'connect.subscribe') {
+          const [action, state] = args
+
+          window.postMessage(
+            { sender: 'wfpu', type, action, state },
+            window.location.origin,
+          )
+        }
+        return result
+      }
+
+  const originalDevTools = window['__REDUX_DEVTOOLS_EXTENSION__'] || {}
+
   const devTools: DevToolsHook = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    connect: function (a: any, b: any, c: any, d: any) {
+    connect: function (...args: any[]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sendMessage('connect')(a, b, c, d)
+
+      const returnValue = monkeyPatch(
+        'connect',
+        originalDevTools?.connect,
+      )(...args)
       return {
-        send: sendMessage('connect.send'),
-        subscribe: sendMessage('connect.subscribe'),
-        unsubscribe: sendMessage('connect.unsubscribe'),
-        init: sendMessage('connect.init'),
-        error: sendMessage('connect.error'),
+        send: monkeyPatch('connect.send', returnValue?.send),
+        subscribe: monkeyPatch('connect.subscribe', returnValue?.subscribe),
+        unsubscribe: monkeyPatch(
+          'connect.unsubscribe',
+          returnValue?.unsubscribe,
+        ),
+        init: monkeyPatch('connect.init', returnValue?.init),
+        error: monkeyPatch('connect.error', returnValue?.error),
       }
     },
-    send: sendMessage('send'),
+    send: monkeyPatch('send', originalDevTools?.send),
   }
 
   function addLowestDistCircle(

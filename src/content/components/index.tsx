@@ -11,7 +11,7 @@ function reducer(state: any, action: any) {
   return state
 }
 
-const initialState = {};
+const initialState = {}
 
 export const WayfarerUltra = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)

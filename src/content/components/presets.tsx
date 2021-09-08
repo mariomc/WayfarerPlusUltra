@@ -16,6 +16,7 @@ import Icon from '@material-ui/core/Icon'
 
 import { PresetsTable } from './presets-table'
 import { SmartSubmit } from './smart-submit'
+import { ReviewCells } from './review-cells'
 import type { PresetConfig, PresetScoreKey, FlatPreset } from '../config'
 import { applyPreset } from '../utils'
 
@@ -183,6 +184,7 @@ const PresetsNoMemo = (): JSX.Element => {
           </Fab>
         </Tooltip>
         <SmartSubmit />
+        <ReviewCells />
         <Dialog
           fullWidth
           maxWidth="xl"

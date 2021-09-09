@@ -41,6 +41,8 @@ const DEBUG = false
 function codeToInject(wfpu: WFPU) {
   const monkeyPatch =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+
       (type: string, originalFn?: (...args: any[]) => any) =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (...args: any[]) => {
@@ -106,8 +108,23 @@ function codeToInject(wfpu: WFPU) {
     return document.querySelector(selector)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getContext = (selector: string): any | null => {
+    return getElement(selector)?.__ngContext__?.at?.(-1)
+  }
+
   window.__REDUX_DEVTOOLS_EXTENSION__ = devTools
   window.WFPU = wfpu
+
+  const modifyMarkers = (markers:Marker[], customIcon:string) => {
+    return markers.map((marker: Marker) => ({
+      ...marker,
+      icon: {
+        ...marker.icon,
+        url: wfpu.extensionURL + customIcon,
+      },
+    }))
+  }
 
   window.addEventListener('message', (ev) => {
     if (ev.origin !== location.origin) {
@@ -117,45 +134,50 @@ function codeToInject(wfpu: WFPU) {
     }
 
     if (ev.data && ev.data.type === 'reviewCells') {
-      const map1 = getElement('app-check-duplicates nia-map')
-      const map2 = getElement('app-location-accuracy nia-map')
-      const map1Ctx = map1?.__ngContext__?.at?.(-1)
-      const map2Ctx = map2?.__ngContext__?.at?.(-1)
+      const duplicateMap = getContext('app-check-duplicates nia-map')
+      const accuracyMap = getContext('app-location-accuracy nia-map')
+      const editMap = getContext('app-select-location-edit nia-map')
 
       // Add Precise Markers to nearby
-      if (map1Ctx) {
-        map1Ctx.markers.nearby.markers = map1Ctx.markers.nearby.markers.map(
-          (marker: Marker) => ({
-            ...marker,
-            icon: {
-              ...marker.icon,
-              url: wfpu.extensionURL + 'icons/precise-marker.svg',
-            },
-          }),
+      if (duplicateMap) {
+        duplicateMap.markers.nearby.markers = modifyMarkers(
+          duplicateMap.markers.nearby.markers,
+          'icons/precise-marker.svg',
         )
 
         // Add Precise Markers to current
-        map1Ctx.markers.default.markers = map1Ctx.markers.default.markers.map(
-          (marker: Marker) => ({
-            ...marker,
-            icon: {
-              ...marker.icon,
-              url: wfpu.extensionURL + 'icons/precise-marker-green.svg',
-            },
-          }),
+        duplicateMap.markers.default.markers = modifyMarkers(
+          duplicateMap.markers.default.markers,
+          'icons/precise-marker-green.svg',
         )
       }
 
+
+      if (accuracyMap && accuracyMap.markers.default.markers) {
+        accuracyMap.markers.default.markers = modifyMarkers(
+          accuracyMap.markers.default.markers,
+          'icons/precise-marker-green.svg',
+        )
+      }
+
+
       // Copy default markers to 2nd map
-      if (map2Ctx && map1Ctx) {
-        map2Ctx.markers.nearby = map1Ctx.markers.nearby
+      if (accuracyMap && duplicateMap) {
+        accuracyMap.markers.nearby = duplicateMap.markers.nearby
+      }
+
+      if (editMap) {
+        editMap.markers.default.markers = modifyMarkers(
+          editMap.markers.default.markers,
+          'icons/precise-marker.svg',
+        )
       }
 
       // Add Controls
       Array.from(
         document.querySelectorAll('nia-map') as NodeListOf<EnhancedElement>,
       ).forEach((map: EnhancedElement) => {
-        const c = map.__ngContext__.get(-1).componentRef
+        const c = map.__ngContext__.at(-1).componentRef
         c.showMapTypeControl =
           c.showRotateControl =
           c.showStreetViewControl =
@@ -170,23 +192,27 @@ function codeToInject(wfpu: WFPU) {
         const c = map.__ngContext__[8]
         c.updateS2CellLevel(17)
       })
-      // circle to check duplicates
-
-      const ref1 = map1Ctx.componentRef
-      addLowestDistCircle(
-        ref1.map,
-        ref1.markers.default.markers[0].latitude,
-        ref1.markers.default.markers[0].longitude,
-      )
 
       // circle to check duplicates
-      const ref2 = map2Ctx.componentRef
-      const target = ref2.markers.default || ref2.markers.suggested
-      addLowestDistCircle(
-        ref2.map,
-        target.markers[0].latitude,
-        target.markers[0].longitude,
-      )
+      const ref1 = duplicateMap?.componentRef
+      if (ref1) {
+        addLowestDistCircle(
+          ref1.map,
+          ref1.markers.default.markers[0].latitude,
+          ref1.markers.default.markers[0].longitude,
+        )
+      }
+
+      // circle to check duplicates
+      const ref2 = accuracyMap?.componentRef
+      if (ref2) {
+        const target = ref2.markers.default || ref2.markers.suggested
+        addLowestDistCircle(
+          ref2.map,
+          target.markers[0].latitude,
+          target.markers[0].longitude,
+        )
+      }
     }
   })
 }

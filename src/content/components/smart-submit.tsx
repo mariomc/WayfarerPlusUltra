@@ -132,7 +132,7 @@ export const SmartSubmit = (): JSX.Element | null => {
         sx={{ bottom: 60 }}
         autoHideDuration={waitingTime}
       >
-        <Alert severity="info">
+        <Alert severity="info" sx={{ width: '100%'}}>
           Submitting in: <Countdown initialCount={waitingTime} />
         </Alert>
       </Snackbar>

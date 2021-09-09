@@ -117,6 +117,13 @@ const getStoredPresets = (): PresetConfig[] => {
   return getLS(LOCAL_STORAGE_KEY) as PresetConfig[]
 }
 
+const addStyle = (styleString:string) => {
+  const style = document.createElement('style');
+  style.textContent = styleString;
+  document.head.append(style);
+  return style;
+}
+
 const PresetsNoMemo = (): JSX.Element => {
   const [changes, setChanges] = useState<FlatPresetMap>({} as FlatPresetMap)
   const [presets, setPresets] = useState<PresetConfig[]>(getStoredPresets())
@@ -157,11 +164,11 @@ const PresetsNoMemo = (): JSX.Element => {
 
   // Changing the padding
   useEffect(() => {
-    document.body.style.paddingBottom = '64px'
+    const style = addStyle(`.mat-drawer-container { margin-bottom: 64px }`);
     return () => {
-      document.body.style.paddingBottom = ''
+      style?.parentElement?.removeChild(style);
     }
-  })
+  }, [])
 
   return (
     <AppBar

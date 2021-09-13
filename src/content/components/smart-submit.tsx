@@ -24,8 +24,13 @@ const expiresSelector = (state: any): number => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isValidSelector = (state: any): number | null => {
-  return state?.review?.reviewResponse?.isValid
+const isValidSelector = (state: any): boolean => {
+  return state?.review?.reviewResponse?.isValid || false
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isReviewSelector = (state: any): boolean => {
+  return state?.router?.state?.url === '/review'
 }
 
 const timeFormat = {
@@ -94,6 +99,7 @@ const clickOnSubmit = (callback: (value: boolean) => void) => {
 export const SmartSubmit = (): JSX.Element | null => {
   const expires = useContextSelector(AppContext, expiresSelector)
   const isValid = useContextSelector(AppContext, isValidSelector)
+  const isReview = useContextSelector(AppContext, isReviewSelector)
   const timerRef = useRef(0)
   const [submitted, setSubmitted] = useState(false)
   const [waitingTime, setWaiting] = useState(0)
@@ -121,7 +127,7 @@ export const SmartSubmit = (): JSX.Element | null => {
     }
   }, [expires])
 
-  if (!expires || submitted) {
+  if (!expires || submitted || !isReview) {
     return null
   }
 
@@ -132,7 +138,7 @@ export const SmartSubmit = (): JSX.Element | null => {
         sx={{ bottom: 60 }}
         autoHideDuration={waitingTime}
       >
-        <Alert severity="info" sx={{ width: '100%'}}>
+        <Alert severity="info" sx={{ width: '100%' }}>
           Submitting in: <Countdown initialCount={waitingTime} />
         </Alert>
       </Snackbar>

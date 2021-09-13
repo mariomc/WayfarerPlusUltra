@@ -124,7 +124,7 @@ const addStyle = (styleString:string) => {
   return style;
 }
 
-const PresetsNoMemo = (): JSX.Element => {
+const NavBarNoMemo = (): JSX.Element => {
   const [changes, setChanges] = useState<FlatPresetMap>({} as FlatPresetMap)
   const [presets, setPresets] = useState<PresetConfig[]>(getStoredPresets())
   const [open, setOpen] = useState<boolean>(false)
@@ -222,4 +222,4 @@ const PresetsNoMemo = (): JSX.Element => {
   )
 }
 
-export const Presets = memo(PresetsNoMemo)
+export const NavBar = memo(NavBarNoMemo)

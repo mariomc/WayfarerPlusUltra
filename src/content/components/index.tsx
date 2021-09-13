@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react'
 
-import { Presets } from './presets'
+import { NavBar } from './navbar'
 import { AppContext } from '../state'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +40,7 @@ export const WayfarerUltra = (): JSX.Element => {
 
   return (
     <AppContext.Provider value={state}>
-      <Presets />
+      <NavBar />
     </AppContext.Provider>
   )
 }

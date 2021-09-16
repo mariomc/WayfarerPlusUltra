@@ -135,7 +135,11 @@ export const SmartSubmit = (): JSX.Element | null => {
     <>
       <Snackbar
         open={waitingTime > 0}
-        sx={{ bottom: 60 }}
+        sx={{
+          position: 'fixed',
+          bottom: '65px !important',
+          left: '0 !important',
+        }}
         autoHideDuration={waitingTime}
       >
         <Alert severity="info" sx={{ width: '100%' }}>
